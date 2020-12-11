@@ -1,4 +1,4 @@
-#Syntax of QJSON files
+# Syntax of QJSON files
 
 version: v0.0.0
 
