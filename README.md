@@ -4,7 +4,7 @@ version: v0.0.0
 
 QJSON files are intended to be created and maintained by humans to 
 provide input data to programs. The expected most frequent usage is
-configuration files. Functions are provided to convert an QJSON text
+configuration files. Functions are provided to convert a QJSON text
 into JSON for which many libraries exist.
 
 This project specifies the QJSON syntax. Since QJSON is young, it may
@@ -27,8 +27,8 @@ A character is any valid Unicode character, but with control characters excluded
 ### Comments
 
 QJSON files may contain comments. There are three types of comments that
-should be familiar to programmers. The convertion of QJSON to JSON ignores
-all comments.
+should be familiar to programmers. When converting QJSON to JSON, comments 
+are discarded.
 
     #...<nl> 
     //...<nl>
@@ -39,39 +39,63 @@ control characters.
 
 ### Strings
 
-There are four types of strings:
+QJSON has four types of strings:
 1. double quoted string (same as JSON strings),
 2. single quoted string (same as double quoted, but single quoted),
 3. quoteless string
 4. multiline string
+
+Identifiers can be double or single quoted strings or quoteless strings. 
+Multiline strings can only be values. 
+
+#### Single and double quoted strings
 
 Single and double quoted string may contain any character and escaped
 characters. The / character doesn’t need to be escaped. The QJSON to JSON
 converter will escape the / character for you when it is needed. A single 
 quoted string doesn’t need to escape ", but must escape ' when needed.
 
-Quoteless strings are very convenient. A quoteless string will start at 
-non whitespace character and will end at a delimiter (:,{}[]), the
-start of a comment or a newline. The ' and " character don’t need to be
-escaped. A quoteless string may not contain escaped characters (e.g. \b).
-A quoteless string is right trimmed of whitespaces. Examples:
+#### Quoteless strings
 
-    The brown fox ,   --> "The brown fox"
+A quoteless string will start at a non whitespace character and will end 
+at a delimiter (:,{}[]), the start of a comment or a newline. The column
+in an ISO 8601 date time value will not terminate the quoteless string. 
+The ' and " characters in a quoteless string don’t need to be escaped. 
+A quoteless string may not contain escaped characters. When converted 
+to JSON string, the `\` character is escaped (e.g. `\b` -> `\\b`). A 
+quoteless string is right trimmed of whitespaces. 
 
-A multiline string can only be used as value. It must start on a newline 
-and is delimited with the character ` at both ends. Multiline strings can
-have a margin. The margin is defined by the sequence of whitespace characters
-in front of the starting ` character. All subsequent lines of the multiline
-string must have the exact same margin. 
+Examples:
 
-The starting ` must be followed by a newline specifier (\n or \r\n). This 
-specifies what to use as newline in the output string. This is needed because
-editors may change the newline between \n and \r\n in the QJSON file. Specifying
-the newline to use, avoids unpredictable newline type in the JSON output. 
+    The brown fox , --> "The brown fox"
+    my id :   --> "my id"
+    x \n y #...  --> "x \\n y"
 
-The multiline string starts on the next line after the line containing the
-starting ` and newline specification. The starting line may contain a 
-comment or whitespace, and nothing else. Examples:
+#### Multiline strings
+
+A multiline string must start on a newline and is delimited with the character 
+\` at both ends. Multiline strings can have a margin to support clean alignment.
+The margin is defined by the sequence of whitespace characters in front of the 
+starting \` character. All subsequent lines of the multiline string must have 
+the exact same margin. 
+
+The starting \` *must* be followed by a newline type specifier (\n or \r\n). It  
+specifies the newline value to use in the JSON string. It is needed because
+editors may change the type of newline (\n or \r\n) in the QJSON file according
+to the operating system convention or configuration settings. Specifying the 
+newline type ensures 100% determinism of the JSON output. The newline type 
+specification may be followed by spaces or a comment. 
+
+The multiline string content starts on the line after the starting \` and newline
+specification.
+
+A multiline string may contain unescaped control characters. They will be escaped
+in the JSON string. A multiline string may contain a \` character, but it must 
+be escaped by adding a \ character *just after it*. The \ character will not be 
+present in the JSON string. 
+
+
+Examples:
 
     `\n
     The
@@ -80,17 +104,18 @@ comment or whitespace, and nothing else. Examples:
 
     --> "The\nbrown\nfox"
 
-       `  \r\n # multiline start with two space margin
+       `  \r\n # this multiline has two white space margin
        The
        brown
        fox`
 
     --> "The\r\nbrown\r\nfox"
 
-Multiline strings may contain control characters. They will be escaped in the
-JSON string. A multiline string may contain a ` character, but it must be escaped
-by adding a \ character just after it. The \ character will not be present in
-the JSON string. 
+    ` \n // multiline containing a ` character
+    Text `\example\`
+    `
+  
+    --> "Text `example`\n"
 
 ### Literal constants
 
