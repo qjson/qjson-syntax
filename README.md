@@ -86,6 +86,9 @@ to the operating system convention or configuration settings. Specifying the
 newline type ensures 100% determinism of the JSON output. The newline type 
 specification may be followed by spaces or a comment. 
 
+The newline specifier may be followed by a `#...` or `//...` comment. A `/*...*/`
+comment is not allowed after the newline specifier. 
+
 The multiline string content starts on the line after the starting \` and newline
 specification.
 
@@ -93,7 +96,6 @@ A multiline string may contain unescaped control characters. They will be escape
 in the JSON string. A multiline string may contain a \` character, but it must 
 be escaped by adding a \ character *just after it*. The \ character will not be 
 present in the JSON string. 
-
 
 Examples:
 
@@ -111,7 +113,7 @@ Examples:
 
     --> "The\r\nbrown\r\nfox"
 
-    ` \n // multiline containing a ` character
+    ` \n // multiline containing escapev ` characters
     Text `\example\`
     `
   
