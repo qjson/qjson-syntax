@@ -24,7 +24,9 @@ diameter unit : km
 ```
 #### JSON:
 
+```
 {"planet":"Earth","diameter":"12 742 km","diameter value":12742,"diameter unit":"km"}
+```
 
 ### Example 2
 
@@ -64,7 +66,7 @@ object: {a: 1, b:2, c:this and this}
 
 ```
 duration: 2h 30m                  # will be converted to seconds
-stamp: 2019-02-13T01:10:32.123456 # will be converted to UTC seconds since 1970-01-01:00:00:00.000000
+stamp: 2019-02-13T01:10:32.123456 # time converted to UTC seconds since 1970-01-01:00:00:00.000000
 ```
 
 #### JSON
