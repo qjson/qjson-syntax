@@ -206,30 +206,52 @@ The aliases of `null` are `Null` and `NULL`.
 
 ### Numbers
 
-Numbers can be the classical integer and decimal number of JSON with the addition 
-that they may contain `_` characters to separate groups of digits. A number can’t start
-or end with an `_` and ther can’t be more than one `_` in sequence. 
+#### Decimal numbers
+Decimal numbers can be the classical integer and floating point number of JSON with the 
+addition that they may contain `_` characters to separate groups of digits. A group of 
+digits can’t start or end with an `_` and there can’t be two or more `_` in sequence.
 
-QJSON also supports binary numbers starting with `0b` or `0B` and followed by one or more
-0 or 1. Binary numbers may also contain `_` characters.
+#### Binary, hexadecimal and octal numbers
 
-Hexadecimal numbers starting with `0x` or `0X` and octal numbers starting with `0o` or
-`0O` are also supported. Octal numbers without the `o` or `O` are also allowed (e.g. 0750).
+QJSON supports also binary numbers starting with `0b` or `0B` and followed by one or more
+0 or 1. Hexadecimal numbers starting with `0x` or `0X` followed by digits in the range 
+`0` to `9` and `A` to `F` or `a` to `f` are also supported. Octal numbers start with 
+`0o` or `0O` or simply `0`, and are followed by digits in the range `0` to `7`. 
 
-QJSON supports also simple arithmetic expressions that will be evaluated in the conversion 
-and the result will be output to JSON. The expression supports the operations `+`, `-`, `/` 
-and `*` on integers and decimals, and `|`, `&`, `^` and `~` on integers only.
+These numbers may also contain the `_` character. They can’t end with a `_` and there 
+can’t be two or more `_` in sequence. 
 
-QJSON uses implicit casting from integer to float when needed. Explicit casting from integer
-to float is not supported. 
+#### Duration and ISO 8601 time values
 
-The conversion first parses numbers and expressions as quoteless strings. If the resulting
-string starts with a digit, skipping spaces, `+`, `-` and any number of `(`, the string is 
-assumed to be a numeric expression and interpreted as such. The consequence is that two 
-numbers in sequence (e.g. "15 30") will be parsed as one quoteless string, then assumed 
-to be a numeric expression, and finaly detected as an invalid numeric expression. It will 
-thus generate an error. You may want to add quotes if it is to be interpreted as a string, 
-or a comma between the numbers if it is to be interpreted as a sequence of two numbers. 
+QJSON supports durations with different units as numeric values. The units are weeks, 
+days, hours, minutes and seconds. They are expressed by an integer value followed by
+`w` for weeks, `d` for days, `h` for hours, `m` for minutes and `s` for seconds. 
+A duration is a sequence of durations with different units (e.g. `1w 1d 3m`). Durations
+are converted to seconds and added together. The JSON value will be the sum of the
+durations converted to seconds. 
+
+#### Arithmetic expressions 
+
+QJSON supports also simple arithmetic expressions that will be evaluated in the conversion
+to JSON process. The expression supports the operations `+`, `-`, `/` and `*` on decimals, 
+and `|`, `&`, `^` and `~` on integers only. Note that binary, hexadecimal and octal numbers
+are converted to integers before the expression evaluation. 
+
+Operations may be grouped by parenthesis. QJSON uses implicit casting from integer to float
+when needed. Explicit casting between integer and float is not supported. 
+
+When parsing a QJSON text, the converter will first identify string values. It implies that
+constants and numeric expressions will first be parsed as quoteless strings. The rule
+defining the quoteless string delimitation will thus apply to numeric expression as well. A
+numeric expression ends at a newline for instance and can’t thus span over multiple lines. 
+
+The converter determines if the quoteless string is a numeric expression by testing if it
+starts by a digit in the range `0` to `9`, ignoring `(`, `-` and `+` characters. To avoid 
+the interpretation as a numeric expression, the string value must be quoted. 
+
+When a QJSON text contains two numbers in sequence (e.g. "[15 30]"), it will be parsed as a 
+single numeric expression which is invalid since there is no operator between the numbers.
+To avoid that, add a comma between the numbers (e.g. "[15, 30]"). 
 
 ### Objects
 
@@ -237,8 +259,17 @@ As in JSON, QJSON objects are delimited by `{` and `}`. Objects may be encapsul
 Objects contain any number of identifier and value pairs separated by `:`. An object
 can only appear as value as in JSON.  
 
+The comma that is required in JSON is optional in QJSON. A comma is not needed when a
+value and next identifier are on different lines. It is required when the value is 
+followed by the identifier on the same line unless the value is a quoted string, 
+an object or an array, or the value and identifier are separated by a `/*...*/` comment. 
+
 ### Arrays
 
 As in JSON, QJSON array values are enclosed in `[` and `]`. The `,` separating values 
-is optional. It is required to separate numbers, numeric expressions, or quoteless 
-strings when on the same line.
+is optional but may be required to disambiguate value parsing. A comma is not needed
+when the two values are separated by a newline, a `/*...*/` comment, or when the first 
+value is an object, an array, or a quoted string. 
+
+When the values on the same line are numbers, arithmetic expressions, litteral constants 
+or quoteless strings, they must be separated by a comma. 
